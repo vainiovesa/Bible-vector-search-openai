@@ -1,4 +1,9 @@
 import db
+from util import base_verses_formatted
+
+
+TRANSLATION = "Biblia"
+DATA_FILE = "fi1776_bible.json"
 
 
 def reinitialize():
@@ -29,6 +34,12 @@ def reinitialize():
         FOREIGN KEY (verse_id) REFERENCES verses(id) ON DELETE CASCADE
     )""")
 
+    for sql in sqls:
+        db.execute(sql)
+
+
+def create_indexes():
+    sqls = []
     sqls.append("""CREATE INDEX idx_translations_verses_translation
         ON translations_verses (translation_id)""")
     sqls.append("""CREATE INDEX idx_translations_verses_verse
@@ -41,3 +52,19 @@ def reinitialize():
 
     for sql in sqls:
         db.execute(sql)
+
+
+def add_translation(name):
+    sql = "INSERT INTO translations (version) VALUES (%s) RETURNING id"
+    translation_id = db.execute(sql, [name])
+    return translation_id
+
+
+def add_base_verses(from_file:str):
+    data = base_verses_formatted(from_file)
+    verse_ids = []
+    sql = "INSERT INTO verses (book, chapter, verse) VALUES (%s, %s, %s) RETURNING id"
+    for row in data:
+        verse_id = db.execute(sql, row)
+        verse_ids.append(verse_id)
+    return verse_ids
