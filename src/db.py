@@ -39,3 +39,15 @@ def query(sql:str, params:list=[]):
     result = conn.execute(sql, params).fetchall()
     conn.close()
     return result
+
+
+def bulk_save(sql:str, types:list, data:list):
+    conn = _get_connection()
+    cur = conn.cursor()
+    with cur.copy(sql) as copy:
+        copy.set_types(types)
+        for i, row in enumerate(data):
+            copy.write_row(row)
+
+            if i % 10000 == 0:
+                print('.', end='', flush=True)
