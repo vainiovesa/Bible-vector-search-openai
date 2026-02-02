@@ -30,13 +30,20 @@ def verses_formatted(file:str, translation_id:int, verse_ids:list):
     data = []
     Bible = _get_bible(file)
     for book in Bible:
+        print(f"Formatting {book["name"]}")
         chapters = book["chapters"]
         for chapter in chapters:
             embeddings = embed(chapter)
             data.extend(zip(chapter, embeddings))
+        print(f"{book["name"]} ready")
 
     data = [(translation_id, verse_ids[i], text, np.array(embedding)) for i, (text, embedding) in enumerate(data)]
     return data
+
+
+def query_embedding_formatted(query:str):
+    embedding = embed(query)[0]
+    return np.array(embedding)
 
 
 def embed(input):
