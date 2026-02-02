@@ -35,12 +35,11 @@ def verses_formatted(file:str, translation_id:int, verse_ids:list):
             embeddings = embed(chapter)
             data.extend(zip(chapter, embeddings))
 
-    translation_id_list = [translation_id for _ in range(len(data))]
-    data = list(zip(translation_id_list, verse_ids, data))
+    data = [(translation_id, verse_ids[i], text, np.array(embedding)) for i, (text, embedding) in enumerate(data)]
     return data
 
 
 def embed(input):
     client = OpenAI()
     response = client.embeddings.create(input=input, model='text-embedding-3-small')
-    return np.array([v.embedding for v in response.data])
+    return [v.embedding for v in response.data]

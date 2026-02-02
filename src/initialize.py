@@ -1,9 +1,9 @@
 import db
-from util import base_verses_formatted
+from util import base_verses_formatted, verses_formatted
 
 
-TRANSLATION = "Biblia"
-DATA_FILE = "fi1776_bible.json"
+TRANSLATION = "Testing"
+DATA_FILE = "temp.json"
 
 
 def reinitialize():
@@ -56,7 +56,7 @@ def create_indexes():
 
 def add_translation(name):
     sql = "INSERT INTO translations (version) VALUES (%s) RETURNING id"
-    translation_id = db.execute(sql, [name])
+    translation_id = db.execute_returning(sql, [name])
     return translation_id
 
 
@@ -65,6 +65,20 @@ def add_base_verses(from_file:str):
     verse_ids = []
     sql = "INSERT INTO verses (book, chapter, verse) VALUES (%s, %s, %s) RETURNING id"
     for row in data:
-        verse_id = db.execute(sql, row)
+        verse_id = db.execute_returning(sql, row)
         verse_ids.append(verse_id)
     return verse_ids
+
+
+def add_verses(from_file:str, translation_id:int, verse_ids:list):
+    data = verses_formatted(from_file, translation_id, verse_ids)
+    sql = "COPY translations_verses (translation_id, verse_id, content, embedding) FROM STDIN WITH (FORMAT BINARY)"
+    types = ["integer", "integer", "text", "vector"]
+    db.bulk_save(sql, types, data)
+
+
+def full_reinitialization():
+    reinitialize()
+    translation_id = add_translation(TRANSLATION)
+    verse_ids = add_base_verses(DATA_FILE)
+    add_verses(DATA_FILE, translation_id, verse_ids)

@@ -34,6 +34,14 @@ def execute(sql:str, params:list=[]):
     conn.close()
 
 
+def execute_returning(sql:str, params:list=[]):
+    conn = _get_connection()
+    result = conn.execute(sql, params)
+    to_return = result.fetchone()
+    conn.close()
+    return to_return[0] if to_return else None
+
+
 def query(sql:str, params:list=[]):
     conn = _get_connection()
     result = conn.execute(sql, params).fetchall()
@@ -44,10 +52,12 @@ def query(sql:str, params:list=[]):
 def bulk_save(sql:str, types:list, data:list):
     conn = _get_connection()
     cur = conn.cursor()
+    m = len(data) // 100
+    m = 1 if m == 0 else m
     with cur.copy(sql) as copy:
         copy.set_types(types)
         for i, row in enumerate(data):
             copy.write_row(row)
 
-            if i % 10000 == 0:
+            if i % m == 0:
                 print('.', end='', flush=True)
