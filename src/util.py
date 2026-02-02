@@ -1,4 +1,10 @@
+from dotenv import load_dotenv
+from openai import OpenAI
+import numpy as np
 import json
+
+
+load_dotenv()
 
 
 def _get_bible(file:str):
@@ -18,3 +24,23 @@ def base_verses_formatted(file:str):
             for verse_num in range(len(verses)):
                 data.append((book_name, chapter_num, verse_num))
     return data
+
+
+def verses_formatted(file:str, translation_id:int, verse_ids:list):
+    data = []
+    Bible = _get_bible(file)
+    for book in Bible:
+        chapters = book["chapters"]
+        for chapter in chapters:
+            embeddings = embed(chapter)
+            data.extend(zip(chapter, embeddings))
+
+    translation_id_list = [translation_id for _ in range(len(data))]
+    data = list(zip(translation_id_list, verse_ids, data))
+    return data
+
+
+def embed(input):
+    client = OpenAI()
+    response = client.embeddings.create(input=input, model='text-embedding-3-small')
+    return np.array([v.embedding for v in response.data])
