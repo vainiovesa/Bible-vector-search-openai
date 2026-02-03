@@ -7,14 +7,16 @@ from pgvector.psycopg import register_vector
 load_dotenv()
 
 DB_NAME = os.environ.get("DB_NAME")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = os.environ.get("DB_PORT", "5432")
 PG_USER = os.environ.get("POSTGRES_USER")
 PG_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 
 
 def _get_connection():
     conn = psycopg.connect(
-        host="localhost",
-        port=5432,
+        host=DB_HOST,
+        port=DB_PORT,
         dbname=DB_NAME,
         user=PG_USER,
         password=PG_PASSWORD,
