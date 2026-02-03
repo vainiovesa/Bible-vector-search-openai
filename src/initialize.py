@@ -2,8 +2,8 @@ import db
 from util import base_verses_formatted, verses_formatted
 
 
-TRANSLATION = "Testing"
-DATA_FILE = "temp.json"
+TRANSLATION = "Biblia"
+DATA_FILE = "fi1776_bible.json"
 
 
 def reinitialize():
@@ -61,24 +61,48 @@ def add_translation(name):
 
 
 def add_base_verses(from_file:str):
+    print("[BASE VERSE ADD] Started")
     data = base_verses_formatted(from_file)
     verse_ids = []
     sql = "INSERT INTO verses (book, chapter, verse) VALUES (%s, %s, %s) RETURNING id"
-    for row in data:
+    n = len(data)
+    m = n // 100
+    print("[BASE VERSE ADD] Started inserting verses")
+    for i, row in enumerate(data):
         verse_id = db.execute_returning(sql, row)
         verse_ids.append(verse_id)
+
+        if i % m == 0:
+            print('.', end='', flush=True)
+    print("[BASE VERSE ADD] Ready")
     return verse_ids
 
 
 def add_verses(from_file:str, translation_id:int, verse_ids:list):
+    print("[VERSE ADD] Started")
     data = verses_formatted(from_file, translation_id, verse_ids)
     sql = "COPY translations_verses (translation_id, verse_id, content, embedding) FROM STDIN WITH (FORMAT BINARY)"
     types = ["integer", "integer", "text", "vector"]
+    print("[VERSE ADD] Bulk save started")
     db.bulk_save(sql, types, data)
+    print("[VERSE ADD] Ready")
 
 
 def full_reinitialization():
+    print("[FULL REINIT] Started")
+    print("[FULL REINIT] Started clearing tables")
     reinitialize()
+    print("[FULL REINIT] Tables cleared")
+    print("[FULL REINIT] Adding translation")
     translation_id = add_translation(TRANSLATION)
+    print("[FULL REINIT] Translation added")
+    print("[FULL REINIT] Started adding base verses")
     verse_ids = add_base_verses(DATA_FILE)
+    print("[FULL REINIT] Base verses added")
+    print("[FULL REINIT] Started adding verses")
     add_verses(DATA_FILE, translation_id, verse_ids)
+    print("[FULL REINIT] Verses added")
+    print("[FULL REINIT] Ready")
+
+if __name__ == "__main__":
+    full_reinitialization()

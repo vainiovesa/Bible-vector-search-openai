@@ -14,6 +14,7 @@ def _get_bible(file:str):
 
 
 def base_verses_formatted(file:str):
+    print("[BASE VERSE FORMATTING] Started")
     data = []
     Bible = _get_bible(file)
     for book in Bible:
@@ -23,6 +24,7 @@ def base_verses_formatted(file:str):
             verses = chapters[chapter_num]
             for verse_num in range(len(verses)):
                 data.append((book_name, chapter_num, verse_num))
+    print("[BASE VERSE FORMATTING] Ready")
     return data
 
 
@@ -30,12 +32,12 @@ def verses_formatted(file:str, translation_id:int, verse_ids:list):
     data = []
     Bible = _get_bible(file)
     for book in Bible:
-        print(f"Formatting {book["name"]}")
+        print(f"[VERSE FORMATTING] Formatting {book["name"]}")
         chapters = book["chapters"]
         for chapter in chapters:
             embeddings = embed(chapter)
             data.extend(zip(chapter, embeddings))
-        print(f"{book["name"]} ready")
+        print(f"[VERSE FORMATTING] {book["name"]} ready")
 
     data = [(translation_id, verse_ids[i], text, np.array(embedding)) for i, (text, embedding) in enumerate(data)]
     return data
