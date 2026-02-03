@@ -2,3 +2,4 @@ openai
 pgvector
 psycopg
 dotenv
+flask

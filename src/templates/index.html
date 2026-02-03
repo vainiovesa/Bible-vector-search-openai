@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<heading>
+    <h1>Vector Search</h1>
+</heading>
+<query>
+    <h2>Search with an idea</h2>
+    <form action="/" method="post">
+        <input type="text" name="query" id="query" maxlength="254" minlength="3" />
+        <input type="submit" value="submit" id="submit" name="submit" />
+    </form>
+</query>
+<content>
+    <results>
+        {% if query %}
+        <b>Your query: {{ query }}</b>
+        {% endif %}
+        {% if result %}
+        {% for item in result %}
+        <result_verse>
+            <translation>{{ item[0] }}</translation>
+            <verse>{{ item[1] }} {{ item[2] }}:{{ item[3] }}</verse>
+            <content>{{ item[4] }}</content>
+            <distance>Distance: ~{{ item[5] }}</distance>
+        </result_verse> <br/>
+        {% endfor %}
+        {% endif %}
+    </results>
+    <guide>
+        <h2>Guide</h2>
+        <p></p>
+        <p></p>
+    </guide>
+</content>
+{% endblock %}
