@@ -22,4 +22,13 @@ def search(query:str, limit:int):
     embedding = query_embedding_formatted(query)
     params = [embedding, limit]
     result = db.query(sql, params)
+    result = _format_result(result)
     return result
+
+
+def _format_result(result:list):
+    formatted = []
+    for row in result:
+        new_row = [*row[:5], round(row[5], ndigits=3)]
+        formatted.append(new_row)
+    return formatted
